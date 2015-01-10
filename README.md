@@ -1,3 +1,12 @@
+# Fedora 14 hack
+
+This branch is a hack to get access to a remote Fedora 14 that lost it's
+original console access.
+
+You need to patch the Dracut network module with 40network.patch.
+
+Keeping this mostly for my own memory of what I have done.
+
 dracut-crypt-sshd
 --------------------
 
