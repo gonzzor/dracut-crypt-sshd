@@ -1,0 +1,51 @@
+diff -ruN /usr/share/dracut/modules.d/40network/ifup /usr/share/dracut/modules.d/40network/ifup
+--- /usr/share/dracut/modules.d/40network/ifup	2010-06-17 10:46:29.000000000 +0200
++++ /usr/share/dracut/modules.d/40network/ifup	2014-12-05 21:26:12.636408968 +0100
+@@ -75,7 +75,10 @@
+     fi >> /tmp/net.$netif.resolv.conf
+ 
+     echo online > /sys/class/net/$netif/uevent
+-    /sbin/initqueue --onetime --name netroot-$netif  /sbin/netroot $netif 
++    . /tmp/net.$netif.up
++    [ -e /tmp/net.$netif.gw ]          && . /tmp/net.$netif.gw     
++    [ -e /tmp/net.$netif.hostname ]    && . /tmp/net.$netif.hostname
++    #/sbin/initqueue --onetime --name netroot-$netif  /sbin/netroot $netif 
+ }
+ 
+ PATH=$PATH:/sbin:/usr/sbin
+@@ -103,7 +104,8 @@
+ [ -f "/tmp/net.$netif.up" ] && exit 0
+ [ -f "/tmp/root.info" ] || exit 0
+ . /tmp/root.info
+-[ -z "$netroot" ] && exit 0
++# Skip this
++#[ -z "$netroot" ] && exit 0
+ 
+ # loopback is always handled the same way
+ if [ "$netif" = "lo" ] ; then
+diff -ruN /usr/share/dracut/modules.d/40network/net-genrules.sh /usr/share/dracut/modules.d/40network/net-genrules.sh
+--- /usr/share/dracut/modules.d/40network/net-genrules.sh	2010-06-17 10:46:29.000000000 +0200
++++ /usr/share/dracut/modules.d/40network/net-genrules.sh	2014-12-05 20:09:37.871438017 +0100
+@@ -12,7 +12,8 @@
+ }
+ 
+ # Don't continue if we don't need network
+-[ -z "$netroot" ] && return;
++# Skip this, we always need the network
++#[ -z "$netroot" ] && return;
+ 
+ # Write udev rules
+ {
+diff -ruN /usr/share/dracut/modules.d/40network/parse-ip-opts.sh /usr/share/dracut/modules.d/40network/parse-ip-opts.sh
+--- /usr/share/dracut/modules.d/40network/parse-ip-opts.sh	2011-01-18 10:44:07.000000000 +0100
++++ /usr/share/dracut/modules.d/40network/parse-ip-opts.sh	2014-12-05 20:40:25.642851173 +0100
+@@ -18,7 +18,8 @@
+ if getarg ip= >/dev/null ; then
+     if [ -z "$netroot" ] ; then
+ 	echo "Warning: No netboot configured, ignoring ip= lines"
+-	return;
++	echo "Ignoring warning and continue anyway"
++	#return;
+     fi
+ fi
+ 
